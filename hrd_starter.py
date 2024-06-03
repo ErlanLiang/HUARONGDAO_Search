@@ -209,10 +209,11 @@ class DFS:
                 return
             self.current_state = self.frontier.pop()
             # self.visited.add(self.current_state.id)
-            actions = self.get_actions()
-            for action in actions:
-                if action.id not in self.visited:
-                    self.frontier.append(action)
+            self.get_actions()
+            # actions = self.get_actions()
+            # for action in actions:
+            #     if action.id not in self.visited:
+            #         self.frontier.append(action)
         return None
     
     def is_goal_state(self):
@@ -253,15 +254,15 @@ class DFS:
         :return: A list of possible state.
         :rtype: List[State]
         """
-        actions = []
+        # actions = []
         for piece in self.current_state.board.pieces:
             for direction in ['up', 'down', 'left', 'right']:
                 new_board = self.move_piece(piece, direction)
                 if new_board and new_board.id not in self.visited:
-                    actions.append(new_board)
+                    # actions.append(new_board)
                     self.visited.add(new_board.id)
-        self.frontier.extend(actions)
-        return actions
+                    self.frontier.append(new_board)
+        # self.frontier.extend(actions)
     
     def move_piece(self, piece, direction):
         new_pieces = deepcopy(self.current_state.board.pieces)
@@ -520,19 +521,19 @@ if __name__ == "__main__":
 
     # dfs.human_play()
 
-    # time_start = time.time()
-    # dfs.dfs()
-    # time_end = time.time()
-    # print("Time: ", time_end - time_start)
+    time_start = time.time()
+    dfs.dfs()
+    time_end = time.time()
+    print("Time: ", time_end - time_start)
 
     astar = AStar(board)
 
     # astar.human_play()
 
-    time_start = time.time()
-    astar.astar()
-    time_end = time.time()
-    print("Time: ", time_end - time_start)
+    # time_start = time.time()
+    # astar.astar()
+    # time_end = time.time()
+    # print("Time: ", time_end - time_start)
 
     # parser = argparse.ArgumentParser()
     # parser.add_argument(
