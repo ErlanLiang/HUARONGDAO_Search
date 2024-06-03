@@ -385,10 +385,10 @@ class AStar:
 
         """
         while self.frontier != []:
-            # print()
-            # self.current_state.board.display()
-            # print("visited: ", len(self.visited))
-            # print("frontier: ", len(self.frontier))
+            print()
+            self.current_state.board.display()
+            print("visited: ", len(self.visited))
+            print("frontier: ", len(self.frontier))
             if self.heuristic(self.current_state.board) == 0:
                 print("Depth: ", self.current_state.depth)
                 self.print_solution()     
@@ -515,7 +515,7 @@ def read_from_file(filename):
 
 
 if __name__ == "__main__":
-    board = read_from_file("testhrd_hard1.txt")
+    board = read_from_file("testhrd_med1.txt")
     dfs = DFS(board)
 
     # dfs.human_play()
