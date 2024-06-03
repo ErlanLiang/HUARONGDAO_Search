@@ -160,6 +160,25 @@ class State:
         self.depth = depth
         self.parent = parent
         self.id = hash(board)  # The id for breaking ties.
+
+    def print_solution(self):
+        """
+        Print out the solution.
+
+        """
+        count = 0
+        path = []
+        cur = self
+        while cur:
+            path.append(cur)
+            cur = cur.parent
+        path.reverse()
+        for state in path:
+            count += 1
+            print("Step: ", count)
+            state.board.display()
+            print()
+        return
     
     def __lt__(self, other):
         return self.f < other.f  # Compare based on f value
@@ -218,56 +237,16 @@ class DFS:
 
         """
         while self.frontier:
-            
             self.current_state = self.frontier.pop()
-
-            # print("===========================================================")
-            # self.current_state.board.display()
-            # print("visited: ", len(self.visited))
-            # print("frontier: ", len(self.frontier))
-            # if len(self.frontier) < 50:
-            #     for i in range(len(self.frontier)):
-            #         print()
-            #         print(i, " Frontier: ")
-            #         self.frontier[i].board.display()
-            #         print("empty: ", self.frontier[i].board.empty)
-
             if self.current_state.board.heuristic() == 0:
                 print("Depth: ", self.current_state.depth)
-                self.print_solution()     
+                self.current_state.print_solution()  
                 return
-            
-            
-            # self.visited.add(self.current_state.id)
             actions = self.get_actions()
             for action in actions:
                 self.frontier.append(action)
         print("No solution found.")
         return None
-        #     self.visited.add(self.current_state.id)
-        #     self.get_actions()
-        #     # for action in actions:
-        #     #     if action.id:
-        #     #         self.frontier.append(action)
-        #     #         self.visited.add(action.id)
-        # return None
-    
-    def print_solution(self):
-        """
-        Print out the solutions
-        """
-        count = 0
-        path = []
-        while self.current_state:
-            path.append(self.current_state)
-            self.current_state = self.current_state.parent
-        path.reverse()
-        for state in path:
-            count += 1
-            print("Step: ", count)
-            state.board.display()
-            print()
-        return   
 
     def get_actions(self):
         """
@@ -280,21 +259,12 @@ class DFS:
         empty_spaces = self.current_state.board.empty
         directions = {'up': (0, -1), 'down': (0, 1), 'left': (-1, 0), 'right': (1, 0)}
         for ex, ey in empty_spaces:
-            # print("ex: ", ex, "ey: ", ey)
             for direction, (dx, dy) in directions.items():
                 nx, ny = ex + dx, ey + dy
                 if 0 <= nx < self.width and 0 <= ny < self.height and self.current_state.board.grid[ny][nx] != '.':
-                    # print("=====================================")
-                    # print("nx: ", nx, "ny: ", ny)
                     piece = self.get_piece_at(nx, ny)
-                    # print("piece: ", piece.coord_x, ", ", piece.coord_y)
-                    # print("direction: ", direction)
                     new_board = self.move_piece(piece, direction)
-                    # if new_board:
-                    #     new_board.board.display()
-                    #     print("empty: ", new_board.board.empty)
                     if new_board and new_board.id not in self.visited:
-                        # print("added")
                         self.visited.add(new_board.id)
                         actions.append(new_board)
 
@@ -328,8 +298,6 @@ class DFS:
                 elif direction == 'up' and p.coord_y + p.shape[0] < self.height:
                     new_empty1 = (p.coord_x, p.coord_y )
                     new_empty2 = (p.coord_x + p.shape[1] - 1, p.coord_y)
-                    # print("new_empty1: ", new_empty1)
-                    # print("new_empty2: ", new_empty2)
                     if (p.coord_x, p.coord_y + p.shape[0]) in empty_spaces:
                         empty_spaces.remove((p.coord_x, p.coord_y + p.shape[0]))
                         empty_spaces.append(new_empty1)
@@ -434,20 +402,13 @@ class AStar:
     
     def astar(self):
         """
-        Perform depth-first search.
-
+        Perform A* search.
         """
-
         while self.frontier:
-            # print()
-            # self.current_state.board.display()
-            # print("visited: ", len(self.visited))
-            # print("frontier: ", len(self.frontier))
             self.current_state = heappop(self.frontier)
-
             if self.heuristic(self.current_state.board) == 0:
                 print("Depth: ", self.current_state.depth)
-                self.print_solution()     
+                self.current_state.print_solution()    
                 return
             self.visited.add(self.current_state.id)
             actions = self.get_actions()
@@ -457,24 +418,6 @@ class AStar:
                     self.visited.add(action.id)
                     
         return None
-    
-    def print_solution(self):
-        """
-        Print out the solution.
-
-        """
-        count = 0
-        path = []
-        while self.current_state:
-            path.append(self.current_state)
-            self.current_state = self.current_state.parent
-        path.reverse()
-        for state in path:
-            count += 1
-            print("Step: ", count)
-            state.board.display()
-            print()
-        return
 
     def get_actions(self):
         """
@@ -487,24 +430,13 @@ class AStar:
         empty_spaces = self.current_state.board.empty
         directions = {'up': (0, -1), 'down': (0, 1), 'left': (-1, 0), 'right': (1, 0)}
         for ex, ey in empty_spaces:
-            # print("ex: ", ex, "ey: ", ey)
             for direction, (dx, dy) in directions.items():
                 nx, ny = ex + dx, ey + dy
                 if 0 <= nx < self.width and 0 <= ny < self.height and self.current_state.board.grid[ny][nx] != '.':
-                    # print("=====================================")
-                    # print("nx: ", nx, "ny: ", ny)
                     piece = self.get_piece_at(nx, ny)
-                    # print("piece: ", piece.coord_x, ", ", piece.coord_y)
-                    # print("direction: ", direction)
                     new_board = self.move_piece(piece, direction)
-                    # if new_board:
-                    #     new_board.board.display()
-                    #     print("empty: ", new_board.board.empty)
                     if new_board and new_board.id not in self.visited:
-                        # print("added")
-                        # self.visited.add(new_board.id)
                         actions.append(new_board)
-
         return actions
     
     def get_piece_at(self, x, y):
@@ -535,8 +467,6 @@ class AStar:
                 elif direction == 'up' and p.coord_y + p.shape[0] < self.height:
                     new_empty1 = (p.coord_x, p.coord_y )
                     new_empty2 = (p.coord_x + p.shape[1] - 1, p.coord_y)
-                    # print("new_empty1: ", new_empty1)
-                    # print("new_empty2: ", new_empty2)
                     if (p.coord_x, p.coord_y + p.shape[0]) in empty_spaces:
                         empty_spaces.remove((p.coord_x, p.coord_y + p.shape[0]))
                         empty_spaces.append(new_empty1)
@@ -567,43 +497,6 @@ class AStar:
                     new_board.empty = empty_spaces
                     return State(new_board, self.current_state.depth + 1 + self.heuristic(new_board), self.current_state.depth + 1, self.current_state)
         return None
-  
-
-    # def get_actions(self):
-    #     """
-    #     Get all possible actions that can be taken from the current state.
-
-    #     :return: A list of possible state.
-    #     :rtype: List[State]
-    #     """
-    #     actions = []
-    #     for piece in self.current_state.board.pieces:
-    #         for direction in ['up', 'down', 'left', 'right']:
-    #             new_board = self.move_piece(piece, direction)
-    #             if new_board and new_board.id not in self.visited:
-    #                 actions.append(new_board)
-    #     return actions
-    
-    # def move_piece(self, piece, direction):
-    #     new_pieces = deepcopy(self.current_state.board.pieces)
-    #     for p in new_pieces:
-    #         if p == piece:
-    #             if direction == 'up' and p.coord_y > 0:
-    #                 p.coord_y -= 1
-    #             elif direction == 'down' and p.coord_y + p.shape[0] < self.height:
-    #                 p.coord_y += 1
-    #             elif direction == 'left' and p.coord_x > 0:
-    #                 p.coord_x -= 1
-    #             elif direction == 'right' and p.coord_x + p.shape[1] < self.width:
-    #                 p.coord_x += 1
-    #             else:
-    #                 return None
-    #     if is_valid(new_pieces):
-    #         # print("piece: ", piece.coord_x, ", ", piece.coord_y, " | direction: ", direction)
-    #         new_board = Board(new_pieces)
-    #         # new_board.display()
-    #         return State(new_board, self.current_state.depth + 1 + self.heuristic(new_board), self.current_state.depth + 1, self.current_state)
-    #     return None
     
 def is_valid(pieces: Piece):
     positions = set()
@@ -662,15 +555,15 @@ def read_from_file(filename):
 
 
 if __name__ == "__main__":
-    board = read_from_file("testhrd_med1.txt")
+    board = read_from_file("testhrd_med4.txt")
     dfs = DFS(board)
 
     # dfs.human_play()
 
-    # time_start = time.time()
-    # dfs.dfs()
-    # time_end = time.time()
-    # print("Time: ", time_end - time_start)
+    dfs_time_start = time.time()
+    dfs.dfs()
+    dfs_time_end = time.time()
+    
 
     astar = AStar(board)
 
@@ -679,7 +572,8 @@ if __name__ == "__main__":
     time_start = time.time()
     astar.astar()
     time_end = time.time()
-    print("Time: ", time_end - time_start)
+    print("DFS Time: ", dfs_time_end - dfs_time_start)
+    print("A* Time: ", time_end - time_start)
 
     # parser = argparse.ArgumentParser()
     # parser.add_argument(
