@@ -176,12 +176,10 @@ class DFS:
         """
         self.width = 4
         self.height = 5
-        # self.initial_state = State(initial_board, 1, 0)
         self.current_state = State(initial_board, 1, 0)
         self.visited = set()
         self.visited.add(self.current_state.id)
         self.frontier = [self.current_state]    
-        # heappush(self.frontier, self.current_state)
     
     def human_play(self):
         """
@@ -202,12 +200,11 @@ class DFS:
             for i, action in enumerate(actions):
                 print(i)
                 action.board.display()
-                self.visited.add(action.id)
                 self.frontier.append(action)
             print("Enter your move: ")
             move = input()
             self.current_state = actions[int(move)]
-            self.visited.add(self.current_state.id)
+            
             self.frontier.remove(self.current_state)
             print("=====================================")
 
@@ -220,24 +217,40 @@ class DFS:
         Perform depth-first search.
 
         """
-        while self.frontier != []:
-            print()
+        while self.frontier:
+            
             self.current_state = self.frontier.pop()
-            self.current_state.board.display()
-            print("visited: ", len(self.visited))
-            print("frontier: ", len(self.frontier))
+
+            # print("===========================================================")
+            # self.current_state.board.display()
+            # print("visited: ", len(self.visited))
+            # print("frontier: ", len(self.frontier))
+            # if len(self.frontier) < 50:
+            #     for i in range(len(self.frontier)):
+            #         print()
+            #         print(i, " Frontier: ")
+            #         self.frontier[i].board.display()
+            #         print("empty: ", self.frontier[i].board.empty)
+
             if self.current_state.board.heuristic() == 0:
                 print("Depth: ", self.current_state.depth)
                 self.print_solution()     
                 return
             
+            
             # self.visited.add(self.current_state.id)
-            self.get_actions()
-            # for action in actions:
-            #     if action.id:
-            #         self.frontier.extend(action)
-            #         self.visited.add(action.id)
+            actions = self.get_actions()
+            for action in actions:
+                self.frontier.append(action)
+        print("No solution found.")
         return None
+        #     self.visited.add(self.current_state.id)
+        #     self.get_actions()
+        #     # for action in actions:
+        #     #     if action.id:
+        #     #         self.frontier.append(action)
+        #     #         self.visited.add(action.id)
+        # return None
     
     def print_solution(self):
         """
@@ -284,7 +297,8 @@ class DFS:
                     if new_board and new_board.id not in self.visited:
                         # print("added")
                         self.visited.add(new_board.id)
-                        self.frontier.append(new_board)
+                        actions.append(new_board)
+
         return actions
     
     def get_piece_at(self, x, y):
@@ -338,18 +352,25 @@ class DFS:
                 else:
                     return None
 
-                # update the second empty space
-                if (p.coord_x + 1, p.coord_y) in empty_spaces and new_empty1 != new_empty2:
-                    empty_spaces.remove((p.coord_x + 1, p.coord_y))
-                    empty_spaces.append(new_empty2)
-                elif (p.coord_x, p.coord_y + 1) in empty_spaces and new_empty1 != new_empty2: 
-                    empty_spaces.remove((p.coord_x, p.coord_y + 1))
-                    empty_spaces.append(new_empty2)
+                # # update the second empty space
+                # if (p.coord_x + 1, p.coord_y) in empty_spaces and new_empty1 != new_empty2:
+                #     empty_spaces.remove((p.coord_x + 1, p.coord_y))
+                #     empty_spaces.append(new_empty2)
+                # elif (p.coord_x, p.coord_y + 1) in empty_spaces and new_empty1 != new_empty2: 
+                #     empty_spaces.remove((p.coord_x, p.coord_y + 1))
+                #     empty_spaces.append(new_empty2)
 
-        if self.is_valid(new_pieces):
-            new_board = Board(new_pieces)
-            new_board.empty = empty_spaces
-            return State(new_board, 1, self.current_state.depth + 1, self.current_state)
+
+                
+
+                if self.is_valid(new_pieces):
+                    new_board = Board(new_pieces)
+                    for x, y in empty_spaces:
+                        if new_board.grid[y][x] != '.':
+                            empty_spaces.remove((x, y))
+                            empty_spaces.append(new_empty2)
+                    new_board.empty = empty_spaces
+                    return State(new_board, 1, self.current_state.depth + 1, self.current_state)
         return None
     
     # def move_piece(self, piece, direction):
@@ -632,7 +653,7 @@ def read_from_file(filename):
 
 
 if __name__ == "__main__":
-    board = read_from_file("testhrd_med1.txt")
+    board = read_from_file("testhrd_hard1.txt")
     dfs = DFS(board)
 
     # dfs.human_play()
