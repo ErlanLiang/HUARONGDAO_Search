@@ -254,8 +254,7 @@ class DFS:
     
     def print_solution(self):
         """
-        Print out the solution.
-
+        Print out the solutions
         """
         count = 0
         path = []
@@ -352,18 +351,7 @@ class DFS:
                 else:
                     return None
 
-                # # update the second empty space
-                # if (p.coord_x + 1, p.coord_y) in empty_spaces and new_empty1 != new_empty2:
-                #     empty_spaces.remove((p.coord_x + 1, p.coord_y))
-                #     empty_spaces.append(new_empty2)
-                # elif (p.coord_x, p.coord_y + 1) in empty_spaces and new_empty1 != new_empty2: 
-                #     empty_spaces.remove((p.coord_x, p.coord_y + 1))
-                #     empty_spaces.append(new_empty2)
-
-
-                
-
-                if self.is_valid(new_pieces):
+                if is_valid(new_pieces):
                     new_board = Board(new_pieces)
                     for x, y in empty_spaces:
                         if new_board.grid[y][x] != '.':
@@ -372,79 +360,6 @@ class DFS:
                     new_board.empty = empty_spaces
                     return State(new_board, 1, self.current_state.depth + 1, self.current_state)
         return None
-    
-    # def move_piece(self, piece, direction):
-    #     new_pieces = deepcopy(self.current_state.board.pieces)
-    #     empty_spaces = deepcopy(self.current_state.board.empty)
-    #     for p in new_pieces:
-    #         if p == piece:
-    #             if direction == 'down' and p.coord_y > 0:
-    #                 new_empty = (p.coord_x, p.coord_y - 1)
-    #                 if new_empty in empty_spaces:
-    #                     empty_spaces.remove(new_empty)
-    #                     empty_spaces.append((p.coord_x, p.coord_y + p.shape[0] - 1))
-    #                     p.coord_y -= 1
-    #             elif direction == 'up' and p.coord_y + p.shape[0] < self.height:
-    #                 new_empty = (p.coord_x, p.coord_y + p.shape[0])
-    #                 if new_empty in empty_spaces:
-    #                     empty_spaces.remove(new_empty)
-    #                     empty_spaces.append((p.coord_x, p.coord_y - 1))
-    #                     p.coord_y += 1
-    #             elif direction == 'right' and p.coord_x > 0:
-    #                 new_empty = (p.coord_x - 1, p.coord_y)
-    #                 if new_empty in empty_spaces:
-    #                     empty_spaces.remove(new_empty)
-    #                     empty_spaces.append((p.coord_x + p.shape[1] - 1, p.coord_y))
-    #                     p.coord_x -= 1
-    #             elif direction == 'left' and p.coord_x + p.shape[1] < self.width:
-    #                 new_empty = (p.coord_x + p.shape[1], p.coord_y)
-    #                 if new_empty in empty_spaces:
-    #                     empty_spaces.remove(new_empty)
-    #                     empty_spaces.append((p.coord_x - 1, p.coord_y))
-    #                     p.coord_x += 1
-    #             else:
-    #                 return None
-    #     if self.is_valid(new_pieces):
-    #         new_board = Board(new_pieces)
-    #         new_board.empty = empty_spaces
-    #         return State(new_board, 1, self.current_state.depth + 1, self.current_state)
-    #     return None
-    
-    # def move_piece(self, piece, direction):
-    #     new_pieces = deepcopy(self.current_state.board.pieces)
-    #     for p in new_pieces:
-    #         if p == piece:
-    #             if direction == 'up' and p.coord_y > 0:
-    #                 p.coord_y -= 1
-    #             elif direction == 'down' and p.coord_y + p.shape[0] < self.height:
-    #                 p.coord_y += 1
-    #             elif direction == 'left' and p.coord_x > 0:
-    #                 p.coord_x -= 1
-    #             elif direction == 'right' and p.coord_x + p.shape[1] < self.width:
-    #                 p.coord_x += 1
-    #             else:
-    #                 return None
-    #     if self.is_valid(new_pieces):
-    #         # print("piece: ", piece.coord_x, ", ", piece.coord_y, " | direction: ", direction)
-    #         new_board = Board(new_pieces)
-    #         # new_board.display()
-    #         return State(new_board, 1, self.current_state.depth + 1, self.current_state)
-    #     return None
-    
-    def is_valid(self, pieces):
-        positions = set()
-        for piece in pieces:
-            if piece.is_goal:
-                positions.update([(piece.coord_x, piece.coord_y), (piece.coord_x + 1, piece.coord_y),
-                                  (piece.coord_x, piece.coord_y + 1), (piece.coord_x + 1, piece.coord_y + 1)])
-            elif piece.is_single:
-                positions.add((piece.coord_x, piece.coord_y))
-            else:
-                if piece.orientation == 'h':
-                    positions.update([(piece.coord_x, piece.coord_y), (piece.coord_x + 1, piece.coord_y)])
-                elif piece.orientation == 'v':
-                    positions.update([(piece.coord_x, piece.coord_y), (piece.coord_x, piece.coord_y + 1)])
-        return len(positions) == len(pieces) + 8
 
 class AStar:
     """
@@ -558,7 +473,6 @@ class AStar:
             state.board.display()
             print()
         return
-        
 
     def get_actions(self):
         """
@@ -568,48 +482,141 @@ class AStar:
         :rtype: List[State]
         """
         actions = []
-        for piece in self.current_state.board.pieces:
-            for direction in ['up', 'down', 'left', 'right']:
-                new_board = self.move_piece(piece, direction)
-                if new_board and new_board.id not in self.visited:
-                    actions.append(new_board)
+        empty_spaces = self.current_state.board.empty
+        directions = {'up': (0, -1), 'down': (0, 1), 'left': (-1, 0), 'right': (1, 0)}
+        for ex, ey in empty_spaces:
+            # print("ex: ", ex, "ey: ", ey)
+            for direction, (dx, dy) in directions.items():
+                nx, ny = ex + dx, ey + dy
+                if 0 <= nx < self.width and 0 <= ny < self.height and self.current_state.board.grid[ny][nx] != '.':
+                    # print("=====================================")
+                    # print("nx: ", nx, "ny: ", ny)
+                    piece = self.get_piece_at(nx, ny)
+                    # print("piece: ", piece.coord_x, ", ", piece.coord_y)
+                    # print("direction: ", direction)
+                    new_board = self.move_piece(piece, direction)
+                    # if new_board:
+                    #     new_board.board.display()
+                    #     print("empty: ", new_board.board.empty)
+                    if new_board and new_board.id not in self.visited:
+                        # print("added")
+                        # self.visited.add(new_board.id)
+                        actions.append(new_board)
+
         return actions
+    
+    def get_piece_at(self, x, y):
+        for piece in self.current_state.board.pieces:
+            if piece.is_goal and (x, y) in [(piece.coord_x, piece.coord_y), (piece.coord_x + 1, piece.coord_y),
+                                            (piece.coord_x, piece.coord_y + 1), (piece.coord_x + 1, piece.coord_y + 1)]:
+                return piece
+            elif piece.is_single and (x, y) == (piece.coord_x, piece.coord_y):
+                return piece
+            elif piece.orientation == 'h' and (x, y) in [(piece.coord_x, piece.coord_y), (piece.coord_x + 1, piece.coord_y)]:
+                return piece
+            elif piece.orientation == 'v' and (x, y) in [(piece.coord_x, piece.coord_y), (piece.coord_x, piece.coord_y + 1)]:
+                return piece
+        return None
     
     def move_piece(self, piece, direction):
         new_pieces = deepcopy(self.current_state.board.pieces)
+        empty_spaces = deepcopy(self.current_state.board.empty)
         for p in new_pieces:
             if p == piece:
-                if direction == 'up' and p.coord_y > 0:
-                    p.coord_y -= 1
-                elif direction == 'down' and p.coord_y + p.shape[0] < self.height:
-                    p.coord_y += 1
-                elif direction == 'left' and p.coord_x > 0:
-                    p.coord_x -= 1
-                elif direction == 'right' and p.coord_x + p.shape[1] < self.width:
-                    p.coord_x += 1
+                if direction == 'down' and p.coord_y > 0:
+                    new_empty1 = (p.coord_x, p.coord_y + p.shape[0] - 1) # the first empty space after moving
+                    new_empty2 = (p.coord_x + p.shape[1] - 1, p.coord_y + p.shape[0] - 1) # the second empty space after moving
+                    if (p.coord_x, p.coord_y - 1) in empty_spaces: # check if the first empty space is empty
+                        empty_spaces.remove((p.coord_x, p.coord_y - 1)) # remove the first empty space
+                        empty_spaces.append(new_empty1) # add the new empty space
+                        p.coord_y -= 1
+                elif direction == 'up' and p.coord_y + p.shape[0] < self.height:
+                    new_empty1 = (p.coord_x, p.coord_y )
+                    new_empty2 = (p.coord_x + p.shape[1] - 1, p.coord_y)
+                    # print("new_empty1: ", new_empty1)
+                    # print("new_empty2: ", new_empty2)
+                    if (p.coord_x, p.coord_y + p.shape[0]) in empty_spaces:
+                        empty_spaces.remove((p.coord_x, p.coord_y + p.shape[0]))
+                        empty_spaces.append(new_empty1)
+                        p.coord_y += 1
+                elif direction == 'right' and p.coord_x > 0:
+                    new_empty1 = (p.coord_x + p.shape[1] - 1, p.coord_y)
+                    new_empty2 = (p.coord_x + p.shape[1] - 1, p.coord_y + p.shape[0] - 1)
+                    if (p.coord_x - 1, p.coord_y) in empty_spaces:
+                        empty_spaces.remove((p.coord_x - 1, p.coord_y))
+                        empty_spaces.append(new_empty1)
+                        p.coord_x -= 1
+                elif direction == 'left' and p.coord_x + p.shape[1] < self.width:
+                    new_empty1 = (p.coord_x, p.coord_y)
+                    new_empty2 = (p.coord_x, p.coord_y + p.shape[0] - 1)
+                    if (p.coord_x + p.shape[1], p.coord_y) in empty_spaces:
+                        empty_spaces.remove((p.coord_x + p.shape[1], p.coord_y))
+                        empty_spaces.append(new_empty1)
+                        p.coord_x += 1
                 else:
                     return None
-        if self.is_valid(new_pieces):
-            # print("piece: ", piece.coord_x, ", ", piece.coord_y, " | direction: ", direction)
-            new_board = Board(new_pieces)
-            # new_board.display()
-            return State(new_board, self.current_state.depth + 1 + self.heuristic(new_board), self.current_state.depth + 1, self.current_state)
+
+                if is_valid(new_pieces):
+                    new_board = Board(new_pieces)
+                    for x, y in empty_spaces:
+                        if new_board.grid[y][x] != '.':
+                            empty_spaces.remove((x, y))
+                            empty_spaces.append(new_empty2)
+                    new_board.empty = empty_spaces
+                    return State(new_board, self.current_state.depth + 1 + self.heuristic(new_board), self.current_state.depth + 1, self.current_state)
         return None
+  
+
+    # def get_actions(self):
+    #     """
+    #     Get all possible actions that can be taken from the current state.
+
+    #     :return: A list of possible state.
+    #     :rtype: List[State]
+    #     """
+    #     actions = []
+    #     for piece in self.current_state.board.pieces:
+    #         for direction in ['up', 'down', 'left', 'right']:
+    #             new_board = self.move_piece(piece, direction)
+    #             if new_board and new_board.id not in self.visited:
+    #                 actions.append(new_board)
+    #     return actions
     
-    def is_valid(self, pieces):
-        positions = set()
-        for piece in pieces:
-            if piece.is_goal:
-                positions.update([(piece.coord_x, piece.coord_y), (piece.coord_x + 1, piece.coord_y),
-                                  (piece.coord_x, piece.coord_y + 1), (piece.coord_x + 1, piece.coord_y + 1)])
-            elif piece.is_single:
-                positions.add((piece.coord_x, piece.coord_y))
-            else:
-                if piece.orientation == 'h':
-                    positions.update([(piece.coord_x, piece.coord_y), (piece.coord_x + 1, piece.coord_y)])
-                elif piece.orientation == 'v':
-                    positions.update([(piece.coord_x, piece.coord_y), (piece.coord_x, piece.coord_y + 1)])
-        return len(positions) == len(pieces) + 8
+    # def move_piece(self, piece, direction):
+    #     new_pieces = deepcopy(self.current_state.board.pieces)
+    #     for p in new_pieces:
+    #         if p == piece:
+    #             if direction == 'up' and p.coord_y > 0:
+    #                 p.coord_y -= 1
+    #             elif direction == 'down' and p.coord_y + p.shape[0] < self.height:
+    #                 p.coord_y += 1
+    #             elif direction == 'left' and p.coord_x > 0:
+    #                 p.coord_x -= 1
+    #             elif direction == 'right' and p.coord_x + p.shape[1] < self.width:
+    #                 p.coord_x += 1
+    #             else:
+    #                 return None
+    #     if is_valid(new_pieces):
+    #         # print("piece: ", piece.coord_x, ", ", piece.coord_y, " | direction: ", direction)
+    #         new_board = Board(new_pieces)
+    #         # new_board.display()
+    #         return State(new_board, self.current_state.depth + 1 + self.heuristic(new_board), self.current_state.depth + 1, self.current_state)
+    #     return None
+    
+def is_valid(pieces: Piece):
+    positions = set()
+    for piece in pieces:
+        if piece.is_goal:
+            positions.update([(piece.coord_x, piece.coord_y), (piece.coord_x + 1, piece.coord_y),
+                                (piece.coord_x, piece.coord_y + 1), (piece.coord_x + 1, piece.coord_y + 1)])
+        elif piece.is_single:
+            positions.add((piece.coord_x, piece.coord_y))
+        else:
+            if piece.orientation == 'h':
+                positions.update([(piece.coord_x, piece.coord_y), (piece.coord_x + 1, piece.coord_y)])
+            elif piece.orientation == 'v':
+                positions.update([(piece.coord_x, piece.coord_y), (piece.coord_x, piece.coord_y + 1)])
+    return len(positions) == len(pieces) + 8
 
 
 def read_from_file(filename):
@@ -658,19 +665,19 @@ if __name__ == "__main__":
 
     # dfs.human_play()
 
-    time_start = time.time()
-    dfs.dfs()
-    time_end = time.time()
-    print("Time: ", time_end - time_start)
+    # time_start = time.time()
+    # dfs.dfs()
+    # time_end = time.time()
+    # print("Time: ", time_end - time_start)
 
     astar = AStar(board)
 
     # astar.human_play()
 
-    # time_start = time.time()
-    # astar.astar()
-    # time_end = time.time()
-    # print("Time: ", time_end - time_start)
+    time_start = time.time()
+    astar.astar()
+    time_end = time.time()
+    print("Time: ", time_end - time_start)
 
     # parser = argparse.ArgumentParser()
     # parser.add_argument(
