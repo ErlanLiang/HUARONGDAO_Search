@@ -194,16 +194,21 @@ class DFS:
             print("===========================================================")
             self.current_state.board.display()
             print("current id: ", self.current_state.id)
+            print("visited: ", len(self.visited))
+            print("frontier: ", len(self.frontier))
             print("=====================================")
             actions = self.get_actions()
             print("Possible moves: ")
             for i, action in enumerate(actions):
                 print(i)
                 action.board.display()
+                self.visited.add(action.id)
+                self.frontier.append(action)
             print("Enter your move: ")
             move = input()
             self.current_state = actions[int(move)]
             self.visited.add(self.current_state.id)
+            self.frontier.remove(self.current_state)
             print("=====================================")
 
 
@@ -217,21 +222,21 @@ class DFS:
         """
         while self.frontier != []:
             print()
+            self.current_state = self.frontier.pop()
             self.current_state.board.display()
             print("visited: ", len(self.visited))
             print("frontier: ", len(self.frontier))
-            self.current_state = self.frontier.pop()
             if self.current_state.board.heuristic() == 0:
                 print("Depth: ", self.current_state.depth)
                 self.print_solution()     
                 return
             
-            self.visited.add(self.current_state.id)
-            actions = self.get_actions()
-            for action in actions:
-                if action.id:
-                    self.frontier.append(action)
-                    self.visited.add(action.id)
+            # self.visited.add(self.current_state.id)
+            self.get_actions()
+            # for action in actions:
+            #     if action.id:
+            #         self.frontier.extend(action)
+            #         self.visited.add(action.id)
         return None
     
     def print_solution(self):
@@ -267,18 +272,19 @@ class DFS:
             for direction, (dx, dy) in directions.items():
                 nx, ny = ex + dx, ey + dy
                 if 0 <= nx < self.width and 0 <= ny < self.height and self.current_state.board.grid[ny][nx] != '.':
+                    # print("=====================================")
                     # print("nx: ", nx, "ny: ", ny)
                     piece = self.get_piece_at(nx, ny)
                     # print("piece: ", piece.coord_x, ", ", piece.coord_y)
                     # print("direction: ", direction)
                     new_board = self.move_piece(piece, direction)
                     # if new_board:
-                        # new_board.board.display()
-                        # print("empty: ", new_board.board.empty)
+                    #     new_board.board.display()
+                    #     print("empty: ", new_board.board.empty)
                     if new_board and new_board.id not in self.visited:
                         # print("added")
-                        actions.append(new_board)
-        self.frontier.extend(actions)
+                        self.visited.add(new_board.id)
+                        self.frontier.append(new_board)
         return actions
     
     def get_piece_at(self, x, y):
