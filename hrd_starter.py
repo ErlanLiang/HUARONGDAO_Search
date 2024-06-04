@@ -161,25 +161,12 @@ class State:
         self.parent = parent
         self.id = hash(board)  # The id for breaking ties.
 
-    def print_solution(self):
+    def print_solution(self, filename):
         """
-        Print out the solution.
-
+        Write the solution to the output file
         """
-        count = 0
-        path = []
-        cur = self
-        while cur:
-            path.append(cur)
-            cur = cur.parent
-        path.reverse()
-        for state in path:
-            count += 1
-            print("Step: ", count)
-            state.board.display()
-            print()
-        return
-    
+        write_to_file(filename, self)
+        
     def __lt__(self, other):
         return self.f < other.f  # Compare based on f value
 
@@ -348,7 +335,8 @@ class AStar:
         heappush(self.frontier, self.current_state)
     
     def heuristic(self, board: Board):
-        return self.linear_conflict(board) + board.heuristic()
+        # return board.heuristic()
+        return board.heuristic() + self.linear_conflict(board)
 
     def linear_conflict(self, board):
         # Example implementation of linear conflict
@@ -408,7 +396,7 @@ class AStar:
             self.current_state = heappop(self.frontier)
             if self.heuristic(self.current_state.board) == 0:
                 print("Depth: ", self.current_state.depth)
-                self.current_state.print_solution()    
+                # self.current_state.print_solution()    
                 return
             self.visited.add(self.current_state.id)
             actions = self.get_actions()
@@ -552,17 +540,52 @@ def read_from_file(filename):
     
     return board
 
+def write_to_file(filename, content):
+    # write the solution to the file as same as the print_solution function
+    with open(filename, 'w') as file:
+        count = -1
+        path = []
+        cur = content
+        while cur:
+            path.append(cur)
+            cur = cur.parent
+        path.reverse()
+        for state in path:
+            count += 1
+            if count == 0:
+                pass
+            else:
+                file.write("Step: " + str(count) + "\n")
+                for i, line in enumerate(state.board.grid):
+                    for ch in line:
+                        file.write(ch)
+                    file.write("\n")
+                file.write("\n")
+
+def solve_puzzle(board, algorithm, outputfile):
+    if algorithm == 'astar':
+        f = AStar(board)
+        f.astar()
+        print("Solved with A*")
+        f.current_state.print_solution(outputfile)
+    elif algorithm == 'dfs':
+        f = DFS(board)
+        f.dfs()
+        print("Solved with DFS")
+        f.current_state.print_solution(outputfile) 
+    else:
+        return "Unknown algorithm"
 
 
 if __name__ == "__main__":
-    board = read_from_file("testhrd_med4.txt")
+    board = read_from_file("testhrd_hard1.txt")
     dfs = DFS(board)
 
-    # dfs.human_play()
+    # # dfs.human_play()
 
-    dfs_time_start = time.time()
-    dfs.dfs()
-    dfs_time_end = time.time()
+    # dfs_time_start = time.time()
+    # dfs.dfs()
+    # dfs_time_end = time.time()
     
 
     astar = AStar(board)
@@ -572,7 +595,7 @@ if __name__ == "__main__":
     time_start = time.time()
     astar.astar()
     time_end = time.time()
-    print("DFS Time: ", dfs_time_end - dfs_time_start)
+    # print("DFS Time: ", dfs_time_end - dfs_time_start)
     print("A* Time: ", time_end - time_start)
 
     # parser = argparse.ArgumentParser()
@@ -599,3 +622,11 @@ if __name__ == "__main__":
 
     # # read the board from the file
     # board = read_from_file(args.inputfile)
+
+    #  # Solve the puzzle using the specified algorithm
+    # solve_puzzle(board, args.algo, args.outputfile)
+
+    # # # Write the solution to the output file
+    # # write_to_file(args.outputfile, solution)
+
+    # print(f"Solution written to {args.outputfile}")
