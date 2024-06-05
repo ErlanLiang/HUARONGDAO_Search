@@ -227,7 +227,7 @@ class DFS:
             self.current_state = self.frontier.pop()
             if self.current_state.board.heuristic() == 0:
                 print("Depth: ", self.current_state.depth)
-                self.current_state.print_solution()  
+                # self.current_state.print_solution(  
                 return
             actions = self.get_actions()
             for action in actions:
@@ -335,7 +335,7 @@ class AStar:
         heappush(self.frontier, self.current_state)
     
     def heuristic(self, board: Board):
-        # return board.heuristic()
+        return board.heuristic()
         return board.heuristic() + self.linear_conflict(board)
 
     def linear_conflict(self, board):
@@ -349,16 +349,16 @@ class AStar:
         
         if caocao:
             goal_x, goal_y = 1, 3
-            if caocao.coord_y < goal_y:  
+            if caocao.coord_y < goal_y or caocao.coord_x < goal_x:
                 for row in range(caocao.coord_y + 2, goal_y + 1):
                     for col in range(caocao.coord_x, caocao.coord_x + 2):
                         if board.grid[row][col] != '.':
                             conflicts += 1
-            if caocao.coord_x < goal_x:  
-                for col in range(caocao.coord_x + 2, goal_x + 1):
-                    for row in range(caocao.coord_y, caocao.coord_y + 2):
-                        if board.grid[row][col] != '.':
-                            conflicts += 1
+            # if caocao.coord_x < goal_x:  
+            #     for col in range(caocao.coord_x + 2, goal_x + 1):
+            #         for row in range(caocao.coord_y, caocao.coord_y + 2):
+            #             if board.grid[row][col] != '.':
+            #                 conflicts += 1
         return conflicts * 2  
     
     def human_play(self):
@@ -578,14 +578,14 @@ def solve_puzzle(board, algorithm, outputfile):
 
 
 if __name__ == "__main__":
-    board = read_from_file("testhrd_hard1.txt")
+    board = read_from_file("testhrd_hard2.txt")
     dfs = DFS(board)
 
     # # dfs.human_play()
 
-    # dfs_time_start = time.time()
-    # dfs.dfs()
-    # dfs_time_end = time.time()
+    dfs_time_start = time.time()
+    dfs.dfs()
+    dfs_time_end = time.time()
     
 
     astar = AStar(board)
@@ -595,7 +595,7 @@ if __name__ == "__main__":
     time_start = time.time()
     astar.astar()
     time_end = time.time()
-    # print("DFS Time: ", dfs_time_end - dfs_time_start)
+    print("DFS Time: ", dfs_time_end - dfs_time_start)
     print("A* Time: ", time_end - time_start)
 
     # parser = argparse.ArgumentParser()
